@@ -1,4 +1,4 @@
-package com.github.demo.producer.demo;
+package com.github.demo.comsumer;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
