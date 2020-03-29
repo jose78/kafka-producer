@@ -1,12 +1,12 @@
-
 server:
   port: 8989
 spring:
   kafka:
     producer:
-      bootstrap-servers: localhost:9092
+      bootstrap-servers: kafka:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
 app:
-    version: 1.0
-    env: local
+  version: 1.0
+  env: local
+kafka_host: ${KAFKA_BOOTSTRAP_SERVER}

@@ -1,5 +1,6 @@
 FROM maven as builder
 COPY . /app
+ENV KAFKA_BOOTSTRAP_SERVER=defaulr
 RUN mvn clean compile package -f /app/pom.xml
 
 RUN ls -ltra  /app/target
@@ -9,6 +10,7 @@ RUN mvn_version=$(mvn -f /app/pom.xml org.apache.maven.plugins:maven-help-plugin
 RUN ls -ltra  /app/target
 
 FROM fabric8/java-alpine-openjdk11-jre
+ENV KAFKA_BOOTSTRAP_SERVER=defaulr
 COPY --from=builder /app/target/producer.jar /app/producer.jar
 RUN ls -ltra /app
 CMD ["java", "-jar" , "/app/producer.jar"]
