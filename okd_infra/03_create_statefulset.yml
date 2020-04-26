@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: monitoring-prometheus
+  labels:
+    type: monitoring
+    app: monitoring-prometheus
+spec:
+  serviceName: monitoring-prometheus-scv
+  replicas: 1
+  podManagementPolicy: "Parallel"
+  updateStrategy:
+    type: "RollingUpdate"
+  selector:
+    matchLabels:
+      app: monitoring-prometheus
+  template:
+    metadata:
+      labels:
+        app: monitoring-prometheus
+    spec:
+      serviceAccountName: monitoring-sa
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v2.1.0
+          args:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+            - "--storage.tsdb.path=/prometheus/"
+          ports:
+            - containerPort: 9090
+          volumeMounts:
+            - mountPath: /etc/prometheus
+              name: prometheus-config
+            - mountPath: /prometheus
+              name: prometheus-data
+        
+        - name: alertmanager
+          args:
+          - --config.file=/etc/alertmanager/alertmanager.yml
+          image: "prom/alertmanager:v0.14.0"
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "50Mi"
+            limits:
+              cpu: "200m" 
+              memory: "200Mi" 
+          ports:
+          - containerPort: 9093
+            name: web
+          volumeMounts:
+          - mountPath: /etc/alertmanager
+            name: alertmanager-config
+          - mountPath: /alertmanager
+            name: alertmanager-data      
+      volumes:
+      - name: prometheus-config
+        configMap:
+          defaultMode: 420
+          name: prometheus-server-conf
+      - name: prometheus-data
+        persistentVolumeClaim:
+          claimName: prometheus
+      - name: alertmanager-config
+        configMap:
+          defaultMode: 420
+          name: alertmanager-server-conf
+      - name: alertmanager-data
+        persistentVolumeClaim:
+          claimName: alertmanager
